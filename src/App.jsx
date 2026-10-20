@@ -130,6 +130,11 @@ export default function App() {
                 onSelectHero={setSelectedHero}
                 comparisonIds={comparisonIds}
                 onToggleCompare={toggleComparison}
+                onClear={() => {
+                  setSearch("");
+                  setSelectedType("Todos");
+                  setSortBy("power-desc");
+                }}
               />
             </section>
           </>

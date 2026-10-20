@@ -520,6 +520,16 @@ h3 {
   min-width: 0;
 }
 
+.comparison-result {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.comparison-hint {
+  margin-top: 20px;
+  color: var(--muted);
+}
+
 @media (max-width: 1000px) {
   .hero-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
