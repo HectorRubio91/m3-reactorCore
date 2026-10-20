@@ -499,6 +499,27 @@ h3 {
   font-size: 0.8rem;
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.hero-power-section {
+  margin-top: 24px;
+}
+
+.filter-control {
+  flex: 1;
+  min-width: 0;
+}
+
 @media (max-width: 1000px) {
   .hero-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
