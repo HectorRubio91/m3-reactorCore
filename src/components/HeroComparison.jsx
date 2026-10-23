@@ -1,168 +1,189 @@
-const POWER_STATS = [
-  { key: "intelligence", label: "Inteligencia" },
-  { key: "strength", label: "Fuerza" },
-  { key: "speed", label: "Velocidad" },
-  { key: "durability", label: "Resistencia" },
-  { key: "power", label: "Poder" },
-  { key: "combat", label: "Combate" }
-];
+import { useMemo, useRef, useState } from "react";
+import { POWER_STATS } from "../utils/heroUtils";
+import StatRow from "./StatRow";
+import { useModalBehavior } from "../hooks/useModalBehavior";
 
 export default function HeroComparison({
-  heroes,
-  selectedIds,
-  onChangeSelection,
-  onClose
+    heroes,
+    selectedIds,
+    onSelectHero,
+    onClose,
 }) {
-  const selectedHeroes = selectedIds.map((id) =>
-    heroes.find((hero) => hero.id === id)
-  );
+    const [failedImages, setFailedImages] = useState([]);
 
-  function handleSelection(slot, value) {
-    const heroId = Number(value);
+    const closeButtonRef = useRef(null);
 
-    onChangeSelection((currentIds) => {
-      const nextIds = [...currentIds];
-      const otherSlot = slot === 0 ? 1 : 0;
+    useModalBehavior(onClose, closeButtonRef);
 
-      if (nextIds[otherSlot] === heroId) {
-        nextIds[otherSlot] = nextIds[slot] ?? null;
-      }
+    const selectedHeroes = useMemo(
+        () =>
+            selectedIds.map((id) =>
+                heroes.find((hero) => hero.id === id) || null
+            ),
+        [heroes, selectedIds]
+    );
 
-      nextIds[slot] = heroId;
+    function handleImageError(heroId) {
+        setFailedImages((current) =>
+            current.includes(heroId) ? current : [...current, heroId]
+        );
+    }
 
-      return nextIds.filter((id) => id !== null && id !== undefined);
-    });
-  }
+    function renderHeroSelector(slot, selectedHero) {
+        return (
+            <select
+                value={selectedHero?.id ?? ""}
+                onChange={(event) =>
+                    onSelectHero(
+                        slot,
+                        event.target.value === ""
+                            ? null
+                            : Number(event.target.value)
+                    )
+                }
+                aria-label={`Seleccionar héroe ${slot + 1}`}
+            >
+                <option value="">Selecciona un héroe</option>
 
-  function renderStats(hero, opponent) {
-    return POWER_STATS.map(({ key, label }) => {
-      const rawValue = Number(hero.powerstats?.[key]);
-      const value = Number.isFinite(rawValue) ? rawValue : 0;
-
-      const opponentValue = Number(opponent?.powerstats?.[key]);
-      const safeOpponentValue = Number.isFinite(opponentValue)
-        ? opponentValue
-        : 0;
-
-      let result = "Empate";
-
-      if (value > safeOpponentValue) {
-        result = "Superior";
-      } else if (value < safeOpponentValue) {
-        result = "Inferior";
-      }
-
-      return (
-        <div className="comparison-stat" key={key}>
-          <span>{label}</span>
-          <strong>{value}</strong>
-          <span className="comparison-result">{result}</span>
-        </div>
-      );
-    });
-  }
-
-  return (
-    <div
-      className="modal-backdrop"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) {
-          onClose();
-        }
-      }}
-    >
-      <section
-        className="modal-panel"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="comparison-title"
-      >
-        <button
-          className="icon-button modal-close"
-          type="button"
-          onClick={onClose}
-          aria-label="Cerrar comparador"
-        >
-          Cerrar
-        </button>
-
-        <p className="eyebrow">VERSUS ANALYSIS</p>
-        <h2 id="comparison-title">Comparador de héroes</h2>
-
-        <p>
-          Selecciona dos personajes para enfrentar sus estadísticas.
-        </p>
-
-        <div className="comparison-grid">
-          {[0, 1].map((slot) => {
-            const hero = selectedHeroes[slot] || null;
-            const opponent = selectedHeroes[slot === 0 ? 1 : 0] || null;
-
-            return (
-              <article className="comparison-column" key={slot}>
-                <label htmlFor={`comparison-hero-${slot}`}>
-                  {slot === 0 ? "Primer héroe" : "Segundo héroe"}
-                </label>
-
-                <select
-                  id={`comparison-hero-${slot}`}
-                  className="comparison-select"
-                  value={hero?.id ?? ""}
-                  onChange={(event) =>
-                    handleSelection(slot, event.target.value)
-                  }
-                >
-                  <option value="">Selecciona un héroe</option>
-
-                  {heroes.map((item) => (
+                {heroes.map((hero) => (
                     <option
-                      key={item.id}
-                      value={item.id}
-                      disabled={
-                        item.id === opponent?.id &&
-                        item.id !== hero?.id
-                      }
+                        key={hero.id}
+                        value={hero.id}
+                        disabled={
+                            selectedIds.includes(hero.id) &&
+                            hero.id !== selectedHero?.id
+                        }
                     >
-                      {item.name}
+                        {hero.name}
                     </option>
-                  ))}
-                </select>
+                ))}
+            </select>
+        );
+    }
 
-                {hero && (
-                  <>
-                    {hero.image && (
-                      <img
-                        className="hero-detail-image"
-                        src={hero.image}
-                        alt={`Retrato de ${hero.name}`}
-                        loading="lazy"
-                      />
+    function renderHeroColumn(hero, slot) {
+        if (!hero) {
+            return (
+                <div className="comparison-column" key={slot}>
+                    {renderHeroSelector(slot, null)}
+                    <p className="comparison-empty">
+                        Selecciona un héroe para compararlo.
+                    </p>
+                </div>
+            );
+        }
+
+        return (
+            <div className="comparison-column" key={slot}>
+                {renderHeroSelector(slot, hero)}
+
+                <div className="comparison-hero">
+                    {failedImages.includes(hero.id) ? (
+                        <div
+                            className="hero-image-placeholder"
+                            role="img"
+                            aria-label={`Imagen no disponible para ${hero.name}`}
+                        >
+                            Imagen no disponible
+                        </div>
+                    ) : (
+                        <img
+                            src={hero.image}
+                            alt={hero.name}
+                            onError={() => handleImageError(hero.id)}
+                        />
                     )}
 
                     <h3>{hero.name}</h3>
+                    <p>{hero.type || "Sin categoría"}</p>
+                    <strong>{hero.power}/10</strong>
+                </div>
 
-                    <p className="hero-type">{hero.type}</p>
+                <div className="comparison-stats">
+                    {POWER_STATS.map(({ key, label }) => {
+                        const opponent = selectedHeroes[1 - slot];
+                        const value = Number(hero.powerstats?.[key]) || 0;
+                        const opponentValue = Number(
+                            opponent?.powerstats?.[key]
+                        ) || 0;
 
-                    <p className="power-badge">
-                      Poder global: {hero.power}/10
-                    </p>
+                        let result = "equal";
 
-                    <div className="comparison-stats">
-                      {renderStats(hero, opponent)}
+                        if (opponent) {
+                            if (value > opponentValue) {
+                                result = "better";
+                            } else if (value < opponentValue) {
+                                result = "worse";
+                            }
+                        }
+
+                        return (
+                            <StatRow
+                                key={key}
+                                label={label}
+                                value={value}
+                                opponentValue={opponent ? opponentValue : undefined}
+                                variant="comparison"
+                                result={result}
+                            />
+                        );
+                    })}
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="modal-overlay" onClick={onClose}>
+            <section
+                className="comparison-modal"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="comparison-title"
+                onClick={(event) => event.stopPropagation()}
+            >
+                <button
+                    ref={closeButtonRef}
+                    className="modal-close"
+                    type="button"
+                    onClick={onClose}
+                    aria-label="Cerrar comparación"
+                >
+                    ×
+                </button>
+
+                <h2 id="comparison-title">Comparar héroes</h2>
+
+                <div className="comparison-columns">
+                    {selectedHeroes.map((hero, slot) =>
+                        renderHeroColumn(hero, slot)
+                    )}
+                </div>
+
+                {selectedHeroes.every(Boolean) && (
+                    <div className="comparison-result">
+                        <h3>Resultado de la comparación</h3>
+
+                        {selectedHeroes[0].power === selectedHeroes[1].power ? (
+                            <p>Ambos héroes tienen el mismo poder general.</p>
+                        ) : (
+                            <p>
+                                El héroe con mayor poder general es{" "}
+                                <strong>
+                                    {
+                                        selectedHeroes.reduce((strongest, hero) =>
+                                            hero.power > strongest.power
+                                                ? hero
+                                                : strongest
+                                        ).name
+                                    }
+                                </strong>
+                                .
+                            </p>
+                        )}
                     </div>
-                  </>
                 )}
-              </article>
-            );
-          })}
+            </section>
         </div>
-
-        {selectedHeroes.filter(Boolean).length < 2 && (
-          <p className="comparison-hint">
-            Selecciona dos personajes para completar la comparación.
-          </p>
-        )}
-      </section>
-    </div>
-  );
+    );
 }

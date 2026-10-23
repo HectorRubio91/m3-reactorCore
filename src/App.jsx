@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useLocalStorage } from "./hooks/useLocalStorage";
 
 import Header from "./components/Header";
 import StatsOverview from "./components/StatsOverview";
@@ -20,12 +21,18 @@ import {
 export default function App() {
   const { heroes, loading, error, reload } = useHeroes();
 
-  const [search, setSearch] = useState("");
-  const [selectedType, setSelectedType] = useState("Todos");
-  const [sortBy, setSortBy] = useState("power-desc");
-  const [selectedHero, setSelectedHero] = useState(null);
-  const [comparisonIds, setComparisonIds] = useState([]);
+  const [search, setSearch] = useLocalStorage("dc-hero-search", "");
+  const [selectedType, setSelectedType] = useLocalStorage("dc-hero-type", "Todos");
+  const [sortBy, setSortBy] = useLocalStorage("dc-hero-sort", "power-desc");
+  const [selectedHeroId, setSelectedHeroId] = useState(null);
+  const [storedComparisonIds, setComparisonIds] = useLocalStorage("dc-hero-comparison", [null, null]);
+  const comparisonIds = Array.isArray(storedComparisonIds)
+    ? [storedComparisonIds[0] ?? null, storedComparisonIds[1] ?? null]
+    : [null, null];
+  
   const [showComparison, setShowComparison] = useState(false);
+
+  const selectedHero = heroes.find((hero) => hero.id === selectedHeroId) ?? null;
 
   const types = useMemo(() => {
     return [
@@ -50,20 +57,47 @@ export default function App() {
 
   function toggleComparison(heroId) {
     setComparisonIds((currentIds) => {
-      if (currentIds.includes(heroId)) {
-        return currentIds.filter((id) => id !== heroId);
+      const ids = Array.isArray(currentIds)
+        ? [currentIds[0] ?? null, currentIds[1] ?? null]
+        : [null, null];
+
+      if (ids.includes(heroId)) {
+        return ids.map((id) => id === heroId ? null : id);
       }
 
-      if (currentIds.length >= 2) {
-        return [...currentIds.slice(1), heroId];
+      const emptySlot = ids.indexOf(null);
+
+      if (emptySlot !== -1) {
+        const nextIds = [...ids];
+        nextIds[emptySlot] = heroId;
+        return nextIds;
       }
 
-      return [...currentIds, heroId];
+      return [ids[1], heroId];
     });
   }
 
+  function selectComparisonHero(slot, heroId) {
+    setComparisonIds((currentIds) => {
+      const nextIds = Array.isArray(currentIds)
+        ? [currentIds[0] ?? null, currentIds[1] ?? null]
+        : [null, null];
+
+      const otherSlot = slot === 0 ? 1 : 0;
+
+      if (nextIds[otherSlot] === heroId) {
+        nextIds[otherSlot] = nextIds[slot];
+      }
+
+      nextIds[slot] = heroId;
+
+      return nextIds;
+    });
+  }
+  
+
   function openComparison() {
-    setSelectedHero(null);
+    setSelectedHeroId(null);
     setShowComparison(true);
   }
 
@@ -74,7 +108,7 @@ export default function App() {
   return (
     <div className="app-shell">
       <Header
-        comparisonCount={comparisonIds.length}
+        comparisonCount={comparisonIds.filter(Boolean).length}
         onOpenComparison={openComparison}
       />
 
@@ -127,7 +161,7 @@ export default function App() {
 
               <HeroCatalog
                 heroes={filteredHeroes}
-                onSelectHero={setSelectedHero}
+                onSelectHero={(hero) => setSelectedHeroId(hero.id)}
                 comparisonIds={comparisonIds}
                 onToggleCompare={toggleComparison}
                 onClear={() => {
@@ -144,7 +178,7 @@ export default function App() {
       {selectedHero && (
         <HeroModal
           hero={selectedHero}
-          onClose={() => setSelectedHero(null)}
+          onClose={() => setSelectedHeroId(null)}
         />
       )}
 
@@ -152,7 +186,7 @@ export default function App() {
         <HeroComparison
           heroes={heroes}
           selectedIds={comparisonIds}
-          onChangeSelection={setComparisonIds}
+          onSelectHero={selectComparisonHero}
           onClose={closeComparison}
         />
       )}

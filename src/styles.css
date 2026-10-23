@@ -25,6 +25,11 @@
   box-sizing: border-box;
 }
 
+html {
+  min-width: 320px;
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
   min-width: 320px;
@@ -90,8 +95,12 @@ h3 {
 .main-content {
   width: min(1200px, calc(100% - 40px));
   margin: 0 auto;
+  padding-top: 48px;
+  padding-bottom: 64px;
   flex: 1;
 }
+
+/* Header */
 
 .site-header {
   position: sticky;
@@ -124,6 +133,8 @@ h3 {
   color: var(--accent);
 }
 
+/* Buttons */
+
 .button,
 .icon-button {
   color: var(--text);
@@ -151,10 +162,7 @@ h3 {
   background: var(--accent-hover);
 }
 
-.main-content {
-  padding-top: 48px;
-  padding-bottom: 64px;
-}
+/* Introduction */
 
 .intro-section {
   max-width: 760px;
@@ -180,6 +188,8 @@ h3 {
   color: var(--muted);
   line-height: 1.7;
 }
+
+/* Statistics overview */
 
 .stats-grid {
   display: grid;
@@ -207,6 +217,8 @@ h3 {
   font-size: clamp(1.4rem, 3vw, 2rem);
   overflow-wrap: anywhere;
 }
+
+/* Catalog */
 
 .catalog-section {
   margin-top: 12px;
@@ -259,6 +271,13 @@ h3 {
   gap: 10px;
 }
 
+.filter-control {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Hero cards */
+
 .hero-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -299,7 +318,11 @@ h3 {
   display: grid;
   aspect-ratio: 4 / 5;
   place-items: center;
+  gap: 8px;
+  padding: 16px;
   color: var(--muted);
+  text-align: center;
+  overflow-wrap: anywhere;
   background: var(--panel-light);
 }
 
@@ -339,11 +362,17 @@ h3 {
   padding: 7px 9px;
 }
 
+.compare-toggle:hover {
+  border-color: var(--accent);
+}
+
 .compare-toggle[aria-pressed="true"] {
   color: #081225;
   background: var(--accent);
   border-color: var(--accent);
 }
+
+/* Loading, error and empty states */
 
 .state-panel {
   padding: 48px 20px;
@@ -379,13 +408,15 @@ h3 {
 }
 
 .error-message {
-  color: var(--danger);
+  color: var(--danger) !important;
 }
 
-.modal-backdrop {
+/* Modal overlay: shared by HeroModal and HeroComparison */
+
+.modal-overlay {
   position: fixed;
   inset: 0;
-  z-index: 30;
+  z-index: 100;
   display: grid;
   place-items: center;
   padding: 20px;
@@ -394,7 +425,10 @@ h3 {
   backdrop-filter: blur(8px);
 }
 
-.modal-panel {
+/* Modal panels */
+
+.hero-modal,
+.comparison-modal {
   position: relative;
   width: min(850px, 100%);
   max-height: calc(100vh - 40px);
@@ -403,28 +437,116 @@ h3 {
   border: 1px solid var(--border);
   border-radius: 20px;
   background: var(--panel);
+  color: var(--text);
+  box-shadow: 0 24px 80px rgb(0 0 0 / 40%);
 }
+
+.comparison-modal {
+  width: min(1100px, 100%);
+}
+
+/* Close button */
 
 .modal-close {
   position: absolute;
   top: 14px;
   right: 14px;
-  z-index: 1;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  color: var(--text);
+  font-size: 1.5rem;
+  line-height: 1;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-light);
 }
 
-.hero-detail-layout {
+.modal-close:hover {
+  border-color: var(--accent);
+  background: #243451;
+}
+
+/* Hero modal */
+
+.hero-modal-content {
   display: grid;
   grid-template-columns: minmax(180px, 0.8fr) minmax(0, 1.2fr);
   gap: 26px;
 }
 
-.hero-detail-image {
+.hero-modal-image {
+  min-width: 0;
+}
+
+.hero-modal-image img {
   width: 100%;
   max-height: 480px;
   object-fit: cover;
   object-position: top;
   border-radius: 12px;
 }
+
+.hero-modal-info {
+  min-width: 0;
+  padding-top: 12px;
+}
+
+.hero-modal-info h2 {
+  padding-right: 35px;
+  margin-bottom: 8px;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  overflow-wrap: anywhere;
+}
+
+.hero-modal-type {
+  color: var(--muted);
+}
+
+.hero-modal-power {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 20px 0;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel-light);
+}
+
+.hero-modal-power strong {
+  color: var(--accent);
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 1.2rem;
+}
+
+.hero-modal-stats,
+.hero-modal-biography {
+  display: grid;
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.hero-modal-stats h3,
+.hero-modal-biography h3 {
+  margin-bottom: 0;
+}
+
+.hero-modal-biography p {
+  margin-bottom: 0;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.hero-modal-biography strong {
+  color: var(--text);
+}
+
+/* Power stat rows */
 
 .power-stats {
   display: grid;
@@ -438,6 +560,17 @@ h3 {
   gap: 10px;
 }
 
+.power-stat-row > span:first-child {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.power-stat-row > span:last-child {
+  text-align: right;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+
 .power-stat-track {
   height: 8px;
   overflow: hidden;
@@ -449,12 +582,16 @@ h3 {
   height: 100%;
   border-radius: inherit;
   background: var(--accent);
+  transition: width 250ms ease;
 }
 
-.comparison-grid {
+/* Hero comparison */
+
+.comparison-columns {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
+  margin-top: 24px;
 }
 
 .comparison-column {
@@ -465,12 +602,64 @@ h3 {
   background: #0f1729;
 }
 
+.comparison-column select {
+  width: 100%;
+  min-height: 42px;
+  margin-bottom: 18px;
+  padding: 8px 10px;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.comparison-column select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .comparison-column h3 {
   overflow-wrap: anywhere;
 }
 
+.comparison-hero {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.comparison-hero img,
+.comparison-hero .hero-image-placeholder {
+  width: 100%;
+  max-height: 280px;
+  aspect-ratio: 4 / 5;
+  object-fit: contain;
+  object-position: center;
+  margin-bottom: 14px;
+  border-radius: 8px;
+  background: var(--panel-light);
+}
+
+.comparison-hero h3 {
+  margin-bottom: 6px;
+}
+
+.comparison-hero p {
+  color: var(--muted);
+}
+
+.comparison-hero > strong {
+  display: inline-block;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
+.comparison-stats {
+  display: grid;
+}
+
 .comparison-stat {
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
   padding: 10px 0;
@@ -480,6 +669,46 @@ h3 {
 .comparison-stat:last-child {
   border-bottom: 0;
 }
+
+.comparison-stat > span:first-child {
+  color: var(--muted);
+}
+
+.comparison-stat strong {
+  font-variant-numeric: tabular-nums;
+}
+
+.comparison-result {
+  margin-top: 24px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #0f1729;
+}
+
+.comparison-result h3 {
+  margin-bottom: 10px;
+}
+
+.comparison-result p {
+  margin-bottom: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.comparison-hint {
+  margin-top: 20px;
+  color: var(--muted);
+}
+
+.comparison-empty {
+  margin-top: 20px;
+  color: var(--muted);
+  text-align: center;
+  line-height: 1.6;
+}
+
+/* Footer */
 
 .site-footer {
   padding: 28px 20px;
@@ -499,6 +728,8 @@ h3 {
   font-size: 0.8rem;
 }
 
+/* Accessibility */
+
 .sr-only {
   position: absolute;
   width: 1px;
@@ -511,24 +742,7 @@ h3 {
   border: 0;
 }
 
-.hero-power-section {
-  margin-top: 24px;
-}
-
-.filter-control {
-  flex: 1;
-  min-width: 0;
-}
-
-.comparison-result {
-  color: var(--muted);
-  font-size: 0.8rem;
-}
-
-.comparison-hint {
-  margin-top: 20px;
-  color: var(--muted);
-}
+/* Responsive layout */
 
 @media (max-width: 1000px) {
   .hero-grid {
@@ -562,16 +776,18 @@ h3 {
     flex-direction: column;
   }
 
-  .hero-detail-layout {
+  .hero-modal-content,
+  .comparison-columns {
     grid-template-columns: 1fr;
   }
 
-  .hero-detail-image {
+  .hero-modal-image img {
     max-height: 320px;
     object-fit: contain;
   }
 
-  .modal-panel {
+  .hero-modal,
+  .comparison-modal {
     padding: 20px;
   }
 
@@ -580,19 +796,20 @@ h3 {
     flex-direction: column;
     gap: 10px;
   }
+
+  .comparison-hero img,
+  .comparison-hero .hero-image-placeholder {
+    max-height: 320px;
+  }
 }
 
 @media (max-width: 420px) {
   .main-content,
   .header-inner {
-    width: min(100% - 24px, 1200px);
+    width: calc(100% - 24px);
   }
 
   .hero-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .comparison-grid {
     grid-template-columns: 1fr;
   }
 
@@ -600,7 +817,32 @@ h3 {
     grid-template-columns: 90px minmax(0, 1fr) 28px;
     gap: 7px;
   }
+
+  .modal-overlay {
+    padding: 8px;
+  }
+
+  .hero-modal,
+  .comparison-modal {
+    max-height: calc(100vh - 16px);
+    padding: 16px;
+  }
+
+  .modal-close {
+    top: 10px;
+    right: 10px;
+  }
+
+  .hero-modal-info h2 {
+    padding-right: 32px;
+  }
+
+  .comparison-column {
+    padding: 12px;
+  }
 }
+
+/* Reduced motion */
 
 @media (prefers-reduced-motion: reduce) {
   *,

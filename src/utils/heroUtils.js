@@ -1,15 +1,15 @@
-const POWER_STATS = [
-  "intelligence",
-  "strength",
-  "speed",
-  "durability",
-  "power",
-  "combat"
+export const POWER_STATS = [
+  { key: "intelligence", label: "Inteligencia" },
+  { key: "strength", label: "Fuerza" },
+  { key: "speed", label: "Velocidad" },
+  { key: "durability", label: "Resistencia" },
+  { key: "power", label: "Poder" },
+  { key: "combat", label: "Combate" }
 ];
 
 export function calcularPoder(powerstats = {}) {
   const total = POWER_STATS.reduce((sum, stat) => {
-    const value = Number(powerstats[stat]);
+    const value = Number(powerstats[stat.key]);
     return sum + (Number.isFinite(value) ? value : 0);
   }, 0);
 
